@@ -143,6 +143,9 @@ You have Read and Grep tools available, and access to the repository directory. 
 - Search for related code patterns or dependencies
 - Verify if the changes align with existing codebase patterns
 
+CRITICAL: Your working directory is the git repository at this path: """ + repo_path + """
+Only analyze files within this repository. Do not reference or analyze files outside this directory or from other projects.
+
 Analyze for:
 1. Compilation/build errors (syntax errors, missing imports, type errors)
 2. Logic issues (bugs, incorrect behavior)
@@ -187,12 +190,14 @@ Git diff:
             if repo_path:
                 # --add-dir: allow Claude to read files in the git repository
                 # --allowedTools: enable Read and Grep tools so Claude can inspect context
+                # cwd=repo_path: set working directory to the git repository so Claude's default context is focused there
                 result = subprocess.run(
                     [self.claude_path, "--print", "--add-dir", repo_path, "--allowedTools", "Read,Grep"],
                     input=prompt,
                     capture_output=True,
                     text=True,
-                    timeout=self.timeout
+                    timeout=self.timeout,
+                    cwd=repo_path  # Set working directory to the target git repository
                 )
             else:
                 # No file access - just use --print
